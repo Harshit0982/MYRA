@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 enum class ConnectionState {
     Disconnected,
@@ -337,6 +336,7 @@ MEMORY EXTRAS (Fast Lane):
 
 PHONE AGENT CONTROL (Fast Lane):
 - trigger_automation runs a careful look-act-verify agent: it checks the screen before every step, proves each action worked, recovers when stuck and double-checks the result before finishing. Use it for anything that needs several taps across apps.
+- If Boss gives SEVERAL tasks in one sentence, pass the WHOLE request to trigger_automation: it splits them and does them one by one, then reports which are done, failed or left. If some are left (e.g. phone was locked), resume_task continues them when Boss says 'baaki kaam karo'.
 - While it runs: task_status tells Boss where it is; pause_task / resume_task / cancel_task control it.
 - When a message starts with [AGENT NEEDS INPUT], ask Boss that question out loud, wait for his answer, then call task_reply with exactly what he said. Payments, orders, deletions and passwords ALWAYS wait for Boss.
 - read_otp reads a fresh verification code (only if enabled in Settings). spotify_play plays music on Spotify. For incoming calls use get_call_info, then answer_call or reject_call when Boss decides.

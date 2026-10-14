@@ -31,14 +31,22 @@ object AgentTaskRegistry {
 
     fun status(): JSONObject {
         val e = current
-        if (e != null) return JSONObject().apply { put("status", "running"); put("task", e.snapshot().toJson()) }
+        val q = TaskQueueRegistry.status()
+        if (e != null) return JSONObject().apply {
+            put("status", "running"); put("task", e.snapshot().toJson())
+            if (q != null) put("task_list", q)
+        }
+        // between two sub-tasks of a task list there is briefly no engine
+        if (q != null) return JSONObject().apply { put("status", "running"); put("task_list", q) }
         val last = lastSnapshot ?: return none()
         return JSONObject().apply { put("status", "finished"); put("task", last.toJson()) }
     }
 
     fun cancel(): JSONObject {
-        val e = current ?: return none()
-        e.cancel()
+        val queueCancelled = TaskQueueRegistry.cancel()   // stops the remaining sub-tasks too
+        val e = current
+        if (e == null && !queueCancelled) return none()
+        e?.cancel()
         return JSONObject().apply { put("status", "cancelling"); put("message", "The task is being stopped.") }
     }
 

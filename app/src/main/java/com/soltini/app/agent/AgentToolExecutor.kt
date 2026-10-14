@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.PowerManager
 import android.util.Log
 import org.json.JSONArray
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 /**
@@ -78,8 +79,34 @@ class AgentToolExecutor(private val context: Context) {
      * Main dispatch function. Returns a JSONObject result sent back to Gemini
      * as a toolResponse so it can verbally confirm what happened.
      */
+    /**
+     * Suspend entry point for callers that already run in a coroutine. It moves the (blocking) tool work to
+     * the IO dispatcher so the caller's own thread is never tied up.
+     */
+    suspend fun executeSuspend(toolName: String, args: JSONObject): JSONObject =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { execute(toolName, args) }
+
+    /**
+     * The ONLY place in this class where blocking tool code bridges into coroutines (replaces 13 raw
+     * `runBlocking` calls). It always runs on the IO dispatcher and always has a timeout, so a stuck network
+     * call or screen capture can no longer hang a task forever.
+     */
+    private fun <T> blocking(timeoutMs: Long = 45_000L, block: suspend () -> T): T {
+        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+            Log.w(TAG, "A blocking tool is being run on the MAIN thread - callers should use executeSuspend()")
+        }
+        return kotlinx.coroutines.runBlocking(kotlinx.coroutines.Dispatchers.IO) {
+            kotlinx.coroutines.withTimeout(timeoutMs) { block() }
+        }
+    }
+
     fun execute(toolName: String, args: JSONObject): JSONObject {
-        val result = executeInternal(toolName, args)
+        val result = try {
+            executeInternal(toolName, args)
+        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+            Log.w(TAG, "Tool $toolName timed out")
+            JSONObject().put("status", "error").put("error", "Tool '$toolName' timed out. Try again.")
+        }
         // Phase 4: learn favourites / routines from what actually worked (never throws)
         com.soltini.app.learning.HabitTracker.record(context, toolName, args, result)
         return result
@@ -120,7 +147,15 @@ class AgentToolExecutor(private val context: Context) {
             "task_status"   -> AgentTaskRegistry.status()
             "cancel_task"   -> AgentTaskRegistry.cancel()
             "pause_task"    -> AgentTaskRegistry.pause()
-            "resume_task"   -> AgentTaskRegistry.resume()
+            "resume_task"   -> {
+                val r = AgentTaskRegistry.resume()
+                if (r.optString("status") == "no_task" && !TaskQueueRegistry.isActive() && TaskQueueStore(context).hasUnfinished()) {
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        TaskQueueRunner(context, this@AgentToolExecutor, com.soltini.app.settings.AppSettings(context)).resume()
+                    }
+                    JSONObject().put("status", "resuming_task_list").put("message", "Adhure kaam dobara shuru kar rahi hu.")
+                } else r
+            }
             "task_reply"    -> AgentTaskRegistry.reply(args.optString("answer", args.optString("reply", "")))
             "read_otp"      -> readOtp()
             "spotify_play"  -> SpotifyAutomator(context).play(args.optString("query", args.optString("song", "")))
@@ -149,7 +184,7 @@ class AgentToolExecutor(private val context: Context) {
                 val ref = args.optString("ref", "")
                 val text = args.optString("text", "")
                 val url = args.optString("url", "")
-                val resultText = kotlinx.coroutines.runBlocking {
+                val resultText = blocking {
                     val controller = com.soltini.app.browser.BrowserController.getInstance(context)
                     controller.executeAction(action, ref, text, url)
                 }
@@ -285,7 +320,7 @@ class AgentToolExecutor(private val context: Context) {
                 } else {
                     // Explicit "internal browser" request only.
                     try {
-                        kotlinx.coroutines.runBlocking {
+                        blocking {
                             com.soltini.app.browser.BrowserController.getInstance(context).playMediaOnYouTube(clean)
                         }
                         JSONObject().apply {
@@ -341,7 +376,7 @@ class AgentToolExecutor(private val context: Context) {
             )
 
             // ── Instagram Automation ──────────────────────────────────────
-            "instagram_send_message" -> kotlinx.coroutines.runBlocking {
+            "instagram_send_message" -> blocking {
                 instagramAutomator.sendMessage(
                     username = args.optString("username", args.optString("contact_name", "")),
                     message = args.optString("message", "")
@@ -436,38 +471,38 @@ class AgentToolExecutor(private val context: Context) {
                 val task = args.optString("task", args.optString("task_description", args.optString("query", "")))
                 publicApiRegistry.recommendApisForTask(task)
             }
-            "execute_public_api" -> kotlinx.coroutines.runBlocking {
+            "execute_public_api" -> blocking {
                 val url = args.optString("url", "")
                 val method = args.optString("method", "GET")
                 val body = args.optString("body", "").ifBlank { null }
                 publicApiExecutor.executeApi(url = url, method = method, body = body)
             }
-            "fetch_crypto_price" -> kotlinx.coroutines.runBlocking {
+            "fetch_crypto_price" -> blocking {
                 val coin = args.optString("coin", args.optString("crypto", "bitcoin"))
                 val currency = args.optString("currency", "usd")
                 publicApiExecutor.fetchCryptoPrice(coin, currency)
             }
-            "fetch_weather" -> kotlinx.coroutines.runBlocking {
+            "fetch_weather" -> blocking {
                 val city = args.optString("city", args.optString("location", "Delhi"))
                 publicApiExecutor.fetchWeather(city)
             }
-            "lookup_dictionary" -> kotlinx.coroutines.runBlocking {
+            "lookup_dictionary" -> blocking {
                 val word = args.optString("word", "")
                 publicApiExecutor.lookupDictionaryWord(word)
             }
-            "fetch_currency_rate" -> kotlinx.coroutines.runBlocking {
+            "fetch_currency_rate" -> blocking {
                 val from = args.optString("from", "USD")
                 val to = args.optString("to", "INR")
                 publicApiExecutor.fetchCurrencyRate(from, to)
             }
-            "lookup_ip" -> kotlinx.coroutines.runBlocking {
+            "lookup_ip" -> blocking {
                 val ip = args.optString("ip", "").ifBlank { null }
                 publicApiExecutor.lookupIp(ip)
             }
-            "fetch_random_joke" -> kotlinx.coroutines.runBlocking {
+            "fetch_random_joke" -> blocking {
                 publicApiExecutor.fetchRandomJoke()
             }
-            "fetch_random_advice" -> kotlinx.coroutines.runBlocking {
+            "fetch_random_advice" -> blocking {
                 publicApiExecutor.fetchRandomAdvice()
             }
 
@@ -578,7 +613,7 @@ class AgentToolExecutor(private val context: Context) {
         val uri = fileManager.prepareImageForVision(file) ?: return error("Could not load ${file.name}.")
         return try {
             val settings = com.soltini.app.settings.AppSettings(context)
-            val analysis = kotlinx.coroutines.runBlocking {
+            val analysis = blocking {
                 com.soltini.app.rag.RagKnowledgeEngine.getInstance(context, settings)
                     .imageVisionParser.analyzeImageWithPrompt(context, uri, question)
             }
@@ -645,7 +680,7 @@ class AgentToolExecutor(private val context: Context) {
     private fun observeScreen(): JSONObject {
         val companion = com.soltini.app.companion.ScreenCompanionManager.getInstance(context)
         val snapshot = try {
-            kotlinx.coroutines.runBlocking {
+            blocking(4_000L) {
                 kotlinx.coroutines.withTimeoutOrNull(2500L) {
                     companion.captureCurrentScreenWithVision()
                 }

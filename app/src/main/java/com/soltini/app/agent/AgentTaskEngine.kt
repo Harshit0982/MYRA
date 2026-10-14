@@ -408,8 +408,8 @@ class AgentTaskEngine(
     private fun functionResponse(name: String, payload: JSONObject): JSONObject =
         JSONObject().put("functionResponse", JSONObject().put("name", name).put("response", JSONObject().put("output", payload)))
 
-    private fun callTool(name: String, args: JSONObject): JSONObject = try {
-        executor.execute(name, args)
+    private suspend fun callTool(name: String, args: JSONObject): JSONObject = try {
+        executor.executeSuspend(name, args)
     } catch (e: Exception) {
         Log.w(TAG, "tool $name failed: ${e.message}")
         JSONObject().put("error", e.message ?: "tool failed")

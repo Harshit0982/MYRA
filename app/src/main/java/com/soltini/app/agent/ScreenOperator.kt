@@ -908,11 +908,7 @@ class ScreenOperator(private val context: Context) {
     }
 
     private fun safeSleep(ms: Long) {
-        try {
-            Thread.sleep(ms)
-        } catch (_: InterruptedException) {
-            Thread.currentThread().interrupt()
-        }
+        UiWait.pause(ms)
     }
 
     private fun errorResult(msg: String): JSONObject = JSONObject().apply {

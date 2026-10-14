@@ -184,6 +184,12 @@ class BackgroundVoiceService : Service(), GeminiLiveListener, ToolCallListener {
 
     override fun onCreate() {
         super.onCreate()
+        // Unfinished task list from before a crash / phone lock? Remind the user (never auto-runs phone actions).
+        try {
+            com.soltini.app.agent.TaskQueueStore(this).unfinishedSummary(6L * 60 * 60 * 1000)?.let {
+                com.soltini.app.agent.TaskQueueNotifier.notifyUnfinished(this, it)
+            }
+        } catch (_: Exception) {}
         instance = this
         Log.i(TAG, "BackgroundVoiceService created")
 
@@ -1641,7 +1647,7 @@ Speak now immediately!"""
             }
 
             try {
-                val result = agentToolExecutor.execute(toolName, args)
+                val result = agentToolExecutor.executeSuspend(toolName, args)
                 geminiLiveManager.sendToolResponse(callId, toolName, result)
                 memory2Engine.session.recordToolResult(toolName, result.optString("message", "Executed $toolName"))
             } finally {
