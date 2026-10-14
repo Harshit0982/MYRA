@@ -2645,7 +2645,7 @@ private fun BusyModeCard(context: Context) {
                         fontSize = 15.sp
                     )
                     GlassStatusBadge(
-                        text = if (isBusy) "ACTIVE • Auto-replying" else "INACTIVE",
+                        text = if (isBusy) "ACTIVE • Drafts (confirmation ke baad hi send)" else "INACTIVE",
                         style = if (isBusy) BadgeStyle.ACTIVE else BadgeStyle.INACTIVE
                     )
                 }

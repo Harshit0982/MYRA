@@ -327,6 +327,33 @@ class MyraOrchestrator private constructor(
         // ═════════════════════════════════════════════════════════════════════
         // DETERMINISTIC ACTION PARSING (Phone Calls, SMS, YouTube & Web Search)
         // ═════════════════════════════════════════════════════════════════════
+        // Busy Mode: spoken confirmation ("bhej do", "mummy ko bhej do", "skip") for a pending reply draft.
+        run {
+            val busyForConfirm = com.soltini.app.messaging.BusyModeManager.getInstance(context)
+            if (busyForConfirm.isBusyModeActive() && busyForConfirm.hasPendingDrafts()) {
+                val ci = com.soltini.app.messaging.BusyContactPolicy.parseConfirmation(cleanedInput)
+                if (ci != null && busyForConfirm.hasPendingFor(ci.name)) {
+                    val reply = when (ci.kind) {
+                        com.soltini.app.messaging.BusyContactPolicy.ConfirmKind.SEND -> busyForConfirm.confirmLatestOrNamed(ci.name)
+                        com.soltini.app.messaging.BusyContactPolicy.ConfirmKind.SKIP -> busyForConfirm.skipLatestOrNamed(ci.name)
+                    }
+                    val plan = OrchestratorPlan(
+                        userGoal = cleanedInput,
+                        intentType = IntentType.ACTIONABLE,
+                        status = PlanStatus.COMPLETED,
+                        finalResponse = reply
+                    )
+                    return@withContext OrchestratorResult(
+                        plan = plan,
+                        isSuccess = true,
+                        responseText = reply,
+                        memoryUpdated = false,
+                        executionDurationMs = System.currentTimeMillis() - startTime
+                    )
+                }
+            }
+        }
+
         val parsedAction = MyraCommandParser.parse(cleanedInput)
         if (parsedAction != null) {
             Log.i(TAG, "MyraCommandParser matched: $parsedAction")
@@ -459,12 +486,12 @@ class MyraOrchestrator private constructor(
 
                     val reply = if (parsedAction.enable) {
                         val reason = busyManager.enableBusyMode(parsedAction.reason)
-                        "Ji Boss! Busy mode on kar diya gaya hai ($reason). Ab WhatsApp, Instagram, Telegram ya SMS par jo bhi naye messages aayenge, main bina kisi loop ke unka polite reply khud de dungi. Jab aap free ho jayein to bas boliyega 'Main free ho gaya'."
+                        "Ji Boss! Busy mode on kar diya gaya hai ($reason). Ab naye messages padhkar main har baat ka jawab draft karungi, par aapki confirmation ke bina kuch nahi bhejungi (notification me 'Bhejo' dabayein ya bolein 'bhej do'). Kisi bhi group me main kabhi message nahi karungi. Free hone par bas boliyega 'Main free ho gaya'."
                     } else {
                         val summary = busyManager.disableBusyMode()
                         if (summary.totalRepliedCount > 0) {
                             val contacts = summary.uniqueSenders.joinToString(", ")
-                            "Ji Boss, welcome back! Busy mode off kar diya gaya hai. Is session me maine kul ${summary.totalRepliedCount} messages ka reply kiya ($contacts)."
+                            "Ji Boss, welcome back! Busy mode off kar diya gaya hai. Is session me aapki confirmation se ${summary.totalRepliedCount} replies gaye ($contacts).${if (summary.unsentDraftCount > 0) " ${summary.unsentDraftCount} draft bina bheje hata diye." else ""}"
                         } else {
                             "Ji Boss, Busy mode off kar diya gaya hai. Is dauran koi naya message nahi aaya tha."
                         }
@@ -488,7 +515,7 @@ class MyraOrchestrator private constructor(
                     val busyManager = com.soltini.app.messaging.BusyModeManager.getInstance(context)
                     val history = busyManager.getRecentHistory(8)
                     val reply = if (history.isEmpty()) {
-                        "Boss, abhi tak busy mode me koi auto-reply nahi bheja gaya hai."
+                        "Boss, abhi tak busy mode me aapki confirmation se koi reply nahi bheja gaya hai."
                     } else {
                         val items = history.joinToString("\n") { "• ${it.appName} (${it.sender}): \"${it.replyText}\"" }
                         "Boss, recent auto-replies ka record:\n$items"

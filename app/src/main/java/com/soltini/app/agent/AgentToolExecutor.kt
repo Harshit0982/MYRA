@@ -360,7 +360,7 @@ class AgentToolExecutor(private val context: Context) {
                         put("status", "success")
                         put("busy_mode_active", true)
                         put("reason", sanitized)
-                        put("message", "Busy mode enabled. Auto-replying to WhatsApp, Instagram, Telegram, SMS messages contextually.")
+                        put("message", "Busy mode enabled. Replies are only DRAFTED; nothing is sent without the user's confirmation, and groups are never answered.")
                     }
                 } else {
                     val summary = busyMgr.disableBusyMode()
@@ -369,7 +369,7 @@ class AgentToolExecutor(private val context: Context) {
                         put("busy_mode_active", false)
                         put("replied_count", summary.totalRepliedCount)
                         put("unique_senders", org.json.JSONArray(summary.uniqueSenders))
-                        put("message", "Busy mode disabled. Replied to ${summary.totalRepliedCount} messages.")
+                        put("message", "Busy mode disabled. ${summary.totalRepliedCount} confirmed replies sent, ${summary.unsentDraftCount} drafts discarded.")
                     }
                 }
             }

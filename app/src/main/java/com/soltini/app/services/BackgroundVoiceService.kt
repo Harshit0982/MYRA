@@ -1449,12 +1449,12 @@ Speak now immediately!"""
             val busyMgr = com.soltini.app.messaging.BusyModeManager.getInstance(applicationContext)
             val responseMsg = if (enable) {
                 val sanitized = busyMgr.enableBusyMode(reason)
-                "Ji Boss, Busy mode activate ho gaya hai ($sanitized). Ab WhatsApp, Instagram, Telegram, SMS ke messages ka polite auto-reply main khud handle karungi."
+                "Ji Boss, Busy mode activate ho gaya hai ($sanitized). Ab main messages padhkar reply draft karungi, par aapki confirmation ke bina kuch nahi bhejungi aur groups me kabhi reply nahi karungi."
             } else {
                 val summary = busyMgr.disableBusyMode()
                 if (summary.totalRepliedCount > 0) {
                     val contacts = summary.uniqueSenders.joinToString(", ")
-                    "Ji Boss, welcome back! Busy mode off kar diya gaya hai. Is session me maine kul ${summary.totalRepliedCount} messages ka reply kiya ($contacts)."
+                    "Ji Boss, welcome back! Busy mode off kar diya gaya hai. Is session me aapki confirmation se ${summary.totalRepliedCount} replies gaye ($contacts)."
                 } else {
                     "Ji Boss, Busy mode deactivate kar diya gaya hai. Is dauran koi naya message nahi aaya tha."
                 }
