@@ -1,5 +1,6 @@
 package com.soltini.app.ui
 
+import com.soltini.app.ui.theme.myraBackground
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
@@ -130,7 +131,7 @@ fun WeatherScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.backgroundBrush)
+            .myraBackground()
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)

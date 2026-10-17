@@ -1,5 +1,6 @@
 package com.soltini.app.ui
 
+import com.soltini.app.ui.theme.myraBackground
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -115,7 +116,7 @@ fun MemoryScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.backgroundBrush)
+            .myraBackground()
             .statusBarsPadding()
             .padding(horizontal = 16.dp)
     ) {

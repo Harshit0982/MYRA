@@ -1,5 +1,6 @@
 package com.soltini.app.ui
 
+import com.soltini.app.ui.theme.myraBackground
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -143,7 +144,7 @@ fun DailyDiaryScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalMyraTokens.current.backgroundBrush)
+            .myraBackground()
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         Scaffold(

@@ -1,5 +1,6 @@
 package com.soltini.app.ui
 
+import com.soltini.app.ui.theme.myraBackground
 import android.Manifest
 import android.app.role.RoleManager
 import android.content.ComponentName
@@ -276,7 +277,7 @@ fun SettingsScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalMyraTokens.current.backgroundBrush)
+            .myraBackground()
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         val selfScrolling = currentRoute == SettingsRoute.VOICE_ID ||

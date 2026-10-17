@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.dp
 import com.soltini.app.ui.theme.ClassicTokens
 import com.soltini.app.ui.theme.GlassCardWhite
 import com.soltini.app.ui.theme.PrimaryPink
+import com.soltini.app.ui.theme.SecondaryMint
 import com.soltini.app.ui.theme.PrimaryPurple
 import com.soltini.app.ui.theme.TextCharcoal
 import com.soltini.app.ui.theme.TextMidGray
@@ -25,6 +26,7 @@ class ClassicFidelityTest {
         assertEquals(TextMidGray, ClassicTokens.textSecondary)
         assertEquals(GlassCardWhite, ClassicTokens.cardColor)
         assertEquals(24.dp, ClassicTokens.cardCornerRadius)
+        assertEquals(SecondaryMint, ClassicTokens.switchOnTrack)
         assertNull(ClassicTokens.cardBorder)
         assertSame(SoftBackgroundBrush, ClassicTokens.backgroundBrush)
         assertSame(PrimaryGradientBrush, ClassicTokens.accentGradient)

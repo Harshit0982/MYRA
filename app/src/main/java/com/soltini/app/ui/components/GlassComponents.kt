@@ -707,10 +707,10 @@ fun GlassPillInput(
 @Composable
 fun glassSwitchColors(): SwitchColors = SwitchDefaults.colors(
     checkedThumbColor = Color.White,
-    checkedTrackColor = SecondaryMint,
+    checkedTrackColor = LocalMyraTokens.current.switchOnTrack,
     checkedBorderColor = Color.Transparent,
     uncheckedThumbColor = Color.White,
-    uncheckedTrackColor = Color(0xFFDCD9E6),
+    uncheckedTrackColor = LocalMyraTokens.current.switchOffTrack,
     uncheckedBorderColor = Color.Transparent
 )
 

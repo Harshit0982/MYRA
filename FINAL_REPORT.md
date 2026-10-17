@@ -43,3 +43,9 @@ unit-tested or run on a device in the sandbox (no Gradle/network/emulator). Trea
 [ ] Overlay orb: switch theme while overlay is running -> orb recreated in blue; Classic back to rainbow.
 [ ] Rotation, font scale 1.3x, gesture nav, small phone (360dp): no clipped controls.
 [ ] Secrets: API keys masked in Settings; nothing sensitive in logcat.
+
+## v2 update: exact reference look
+Colours were sampled from the reference image: primary #2C7FFC, mic ring #35B6FD, buttons gradient #2368F0 -> #3E9BFD, switch OFF #CBD8EE,
+background #BFE1FC -> #E7F5FD with soft cloud glows (ui/theme/MyraBackground.kt), frosted white cards with bright white edge.
+Blue Glass bottom bar now matches the reference (icon over label, white bubble on selected, big glowing mic). Glossy blue avatar orb in Home + Chat.
+Switches are blue/white-thumb in Blue Glass; Classic switch colours unchanged.

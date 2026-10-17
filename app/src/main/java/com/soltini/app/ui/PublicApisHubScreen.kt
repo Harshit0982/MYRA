@@ -153,7 +153,7 @@ fun PublicApisHubScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalMyraTokens.current.backgroundBrush)
+            .myraBackground()
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         LazyColumn(

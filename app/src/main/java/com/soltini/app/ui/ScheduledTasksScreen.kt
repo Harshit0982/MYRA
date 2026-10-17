@@ -71,7 +71,7 @@ fun ScheduledTasksScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalMyraTokens.current.backgroundBrush)
+            .myraBackground()
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {

@@ -158,7 +158,7 @@ fun VoiceScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(LocalMyraTokens.current.backgroundBrush)
+            .myraBackground()
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
         // Soft pastel ambient light aura
@@ -458,6 +458,9 @@ private fun TopBar(
     ) {
         // Brand Identity
         Row(verticalAlignment = Alignment.CenterVertically) {
+          if (LocalMyraTokens.current.mode == MyraThemeMode.BLUE_GLASS) {
+            com.soltini.app.ui.components.MyraAvatarOrb(size = 46.dp)
+          } else {
             Box(
                 modifier = Modifier
                     .size(42.dp)
@@ -478,6 +481,7 @@ private fun TopBar(
                     modifier = Modifier.size(22.dp)
                 )
             }
+          }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(

@@ -28,7 +28,10 @@ data class MyraTokens(
     val cardBorder: BorderStroke?,
     val shadowColor: Color,
     val cardCornerRadius: Dp,
-    val subtleSurface: Color
+    val subtleSurface: Color,
+    val switchOnTrack: Color,
+    val switchOffTrack: Color,
+    val navUnselected: Color
 )
 
 val ClassicTokens = MyraTokens(
@@ -44,20 +47,23 @@ val ClassicTokens = MyraTokens(
     cardBorder = null,
     shadowColor = PrimaryPurple,
     cardCornerRadius = 24.dp,
-    subtleSurface = GlassSurfaceSubtle
+    subtleSurface = GlassSurfaceSubtle,
+    switchOnTrack = SecondaryMint,
+    switchOffTrack = Color(0xFFDCD9E6),
+    navUnselected = TextMidGray
 )
 
 // Blue Glass palette (starting values from the redesign brief)
-val BluePrimary = Color(0xFF087BFF)
-val BlueElectricCyan = Color(0xFF39D9FF)
-val BlueDeep = Color(0xFF0753D6)
-val BlueIceBackground = Color(0xFFEAF5FF)
-val BluePaleCyanSurface = Color(0xFFD8F1FF)
-val BlueTextPrimary = Color(0xFF10264B)
-val BlueTextSecondary = Color(0xFF617A9D)
+val BluePrimary = Color(0xFF2C7FFC)      // sampled: enrollment button / toggle ON
+val BlueElectricCyan = Color(0xFF35B6FD) // sampled: mic ring / orb glow
+val BlueDeep = Color(0xFF1F5FE6)
+val BlueIceBackground = Color(0xFFD6ECFC)
+val BluePaleCyanSurface = Color(0xFFE7F5FD)
+val BlueTextPrimary = Color(0xFF0F2547)
+val BlueTextSecondary = Color(0xFF5F7594)
 
 val BlueGlassBackgroundBrush: Brush = Brush.verticalGradient(
-    colors = listOf(BlueIceBackground, BluePaleCyanSurface, BlueIceBackground)
+    colors = listOf(Color(0xFFBFE1FC), Color(0xFFD6ECFC), Color(0xFFE7F5FD), Color(0xFFD3EAFB))
 )
 
 val BlueGlassTokens = MyraTokens(
@@ -65,15 +71,18 @@ val BlueGlassTokens = MyraTokens(
     backgroundBrush = BlueGlassBackgroundBrush,
     accent = BluePrimary,
     accentSecondary = BlueElectricCyan,
-    accentGradient = Brush.linearGradient(listOf(BluePrimary, BlueElectricCyan)),
-    accentHorizontalGradient = Brush.horizontalGradient(listOf(BluePrimary, BlueElectricCyan)),
+    accentGradient = Brush.linearGradient(listOf(Color(0xFF2368F0), Color(0xFF3FA3FF))),
+    accentHorizontalGradient = Brush.horizontalGradient(listOf(Color(0xFF2368F0), Color(0xFF3E9BFD))),
     textPrimary = BlueTextPrimary,
     textSecondary = BlueTextSecondary,
     cardColor = Color(0xCCFFFFFF),                     // ~80% white: frosted, lets the blue show through
-    cardBorder = BorderStroke(1.dp, Color(0xB3FFFFFF)), // subtle white edge
-    shadowColor = BluePrimary,
-    cardCornerRadius = 26.dp,
-    subtleSurface = Color(0x99FFFFFF)
+    cardBorder = BorderStroke(1.dp, Color(0xE6FFFFFF)), // bright white glass edge
+    shadowColor = Color(0xFF5B9BE8),
+    cardCornerRadius = 22.dp,
+    subtleSurface = Color(0x99FFFFFF),
+    switchOnTrack = BluePrimary,
+    switchOffTrack = Color(0xFFCBD8EE),
+    navUnselected = Color(0xFF5B6E8C)
 )
 
 fun tokensFor(mode: MyraThemeMode): MyraTokens = when (mode) {

@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(LocalMyraTokens.current.backgroundBrush)
+                        .myraBackground()
                 ) {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
@@ -411,6 +411,10 @@ private fun FloatingGlassBottomNavBar(
     val haptic = LocalHapticFeedback.current
     val tokens = LocalMyraTokens.current
     val isBlue = tokens.mode == MyraThemeMode.BLUE_GLASS
+    if (isBlue) {
+        BlueGlassNavBar(currentScreen, onSelectScreen, micMuted, onMicClick)
+        return
+    }
 
     // Classic: the original six destinations, untouched.
     // Blue Glass: Home, Chat, Browser | mic | Devices, Settings. APIs Hub and Logs stay reachable from the
@@ -584,6 +588,133 @@ private fun FloatingGlassBottomNavBar(
                                 )
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/** Reference-style bottom bar: frosted white pill, icon over label, selected item in a white bubble, large glowing mic. */
+@Composable
+private fun BlueGlassNavBar(
+    currentScreen: String,
+    onSelectScreen: (String) -> Unit,
+    micMuted: Boolean,
+    onMicClick: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    val t = LocalMyraTokens.current
+    val items = listOf(
+        NavDestination("voice", "Home", Icons.Default.Home),
+        NavDestination("chat", "Chat", Icons.Default.ChatBubble),
+        NavDestination("browser", "Browser", Icons.Default.Language),
+        null, // mic slot
+        NavDestination("home_automation", "Devices", Icons.Default.ElectricBolt),
+        NavDestination("settings", "Settings", Icons.Default.Settings)
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Surface(
+            shape = RoundedCornerShape(30.dp),
+            color = Color(0xD9FFFFFF),
+            border = t.cardBorder,
+            tonalElevation = 0.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(66.dp)
+                .shadow(14.dp, RoundedCornerShape(30.dp), ambientColor = t.shadowColor.copy(alpha = 0.20f), spotColor = t.shadowColor.copy(alpha = 0.25f))
+        ) {}
+        Row(
+            modifier = Modifier.fillMaxWidth().height(66.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEach { item ->
+                if (item == null) {
+                    Box(modifier = Modifier.weight(1.15f), contentAlignment = Alignment.Center) {
+                        val ringBrush = Brush.linearGradient(listOf(Color(0xFF7FE0FF), Color(0xFF35B6FD)))
+                        Box(
+                            modifier = Modifier
+                                .offset(y = (-14).dp)
+                                .size(68.dp)
+                                .shadow(12.dp, CircleShape, ambientColor = Color(0xFF35B6FD), spotColor = Color(0xFF2C7FFC))
+                                .clip(CircleShape)
+                                .background(Color(0xE6FFFFFF))
+                                .padding(4.dp)
+                                .clip(CircleShape)
+                                .background(ringBrush)
+                                .padding(3.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (micMuted) Brush.linearGradient(listOf(Color(0xFFFDE8E8), Color(0xFFFCD2D2)))
+                                    else Brush.radialGradient(listOf(Color(0xFF3FA3FF), Color(0xFF2C7FFC), Color(0xFF1F5FE6)))
+                                )
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onMicClick()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (micMuted) Icons.Default.MicOff else Icons.Default.Mic,
+                                contentDescription = if (micMuted) "Unmute microphone" else "Microphone",
+                                tint = if (micMuted) Color(0xFFD64545) else Color.White,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+                } else {
+                    val selected = if (item.route == "home_automation") {
+                        currentScreen == "home_automation" || currentScreen == "add_device"
+                    } else currentScreen == item.route
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(20.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                if (!selected) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onSelectScreen(item.route)
+                                }
+                            }
+                            .padding(vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .then(
+                                    if (selected) Modifier
+                                        .shadow(4.dp, CircleShape, ambientColor = t.shadowColor.copy(alpha = 0.25f), spotColor = t.shadowColor.copy(alpha = 0.30f))
+                                        .clip(CircleShape)
+                                        .background(Color.White)
+                                    else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = if (selected) t.accent else t.navUnselected,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Text(
+                            text = item.label,
+                            color = if (selected) t.accent else t.navUnselected,
+                            fontSize = 10.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                            maxLines = 1
+                        )
                     }
                 }
             }

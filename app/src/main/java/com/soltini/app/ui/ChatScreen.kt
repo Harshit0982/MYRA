@@ -1,5 +1,6 @@
 package com.soltini.app.ui
 
+import com.soltini.app.ui.theme.myraBackground
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -99,7 +100,7 @@ fun ChatScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(t.backgroundBrush)
+            .myraBackground()
             .statusBarsPadding()
             .imePadding()
             .padding(horizontal = 16.dp)
@@ -109,12 +110,7 @@ fun ChatScreen(
             modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier.size(40.dp).clip(CircleShape).background(t.accentGradient),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.SmartToy, contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp))
-            }
+            com.soltini.app.ui.components.MyraAvatarOrb(size = 44.dp)
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text("Myra", color = t.textPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
@@ -272,12 +268,15 @@ private fun ChatBubble(text: String, isUser: Boolean, onCopy: () -> Unit, onRetr
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) { Text(text, color = Color.White, fontSize = 14.sp, lineHeight = 20.sp) }
             } else {
-                GlassCard(
-                    modifier = Modifier.align(Alignment.CenterStart),
-                    cornerRadius = 20.dp,
-                    elevation = 2.dp,
-                    contentPadding = 14.dp
-                ) { Text(text, color = t.textPrimary, fontSize = 14.sp, lineHeight = 20.sp) }
+                Row(modifier = Modifier.align(Alignment.CenterStart), verticalAlignment = Alignment.Top) {
+                    com.soltini.app.ui.components.MyraAvatarOrb(size = 34.dp)
+                    Spacer(Modifier.width(8.dp))
+                    GlassCard(
+                        cornerRadius = 20.dp,
+                        elevation = 2.dp,
+                        contentPadding = 14.dp
+                    ) { Text(text, color = t.textPrimary, fontSize = 14.sp, lineHeight = 20.sp) }
+                }
             }
         }
         if (!isUser) {
