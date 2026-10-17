@@ -113,6 +113,8 @@ fun VoiceScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    // Capture theme mode during composition; LazyListScope item conditions are not composable.
+    val currentThemeMode = LocalMyraTokens.current.mode
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
@@ -205,7 +207,7 @@ fun VoiceScreen(
             }
 
             // Blue Glass home dashboard: shortcut cards to existing destinations (Classic keeps its own nav)
-            if (LocalMyraTokens.current.mode == MyraThemeMode.BLUE_GLASS) {
+            if (currentThemeMode == MyraThemeMode.BLUE_GLASS) {
                 item {
                     HomeShortcutCards(
                         onOpenBrowser = onOpenBrowser,

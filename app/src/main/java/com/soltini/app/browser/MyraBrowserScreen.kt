@@ -120,6 +120,8 @@ fun MyraBrowserScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    // Read CompositionLocal values during composition; callbacks capture this stable snapshot.
+    val myraTokens = LocalMyraTokens.current
     val browserController = remember { BrowserController.getInstance(context) }
     val themeManager = remember { BrowserThemeManager.getInstance(context) }
     val scope = rememberCoroutineScope()
@@ -1144,7 +1146,7 @@ fun MyraBrowserScreen(
                                     name = newName,
                                     url = fullUrl,
                                     iconLabel = initial,
-                                    gradient = listOf(LocalMyraTokens.current.accent, LocalMyraTokens.current.accentSecondary)
+                                    gradient = listOf(myraTokens.accent, myraTokens.accentSecondary)
                                 )
                             )
                             showAddShortcutDialog = false
