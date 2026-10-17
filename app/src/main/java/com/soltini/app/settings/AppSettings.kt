@@ -256,10 +256,15 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_MEM0_AGENT_ID, "myra") ?: "myra"
         set(value) = prefs.edit().putString(KEY_MEM0_AGENT_ID, value.trim().ifBlank { "myra" }).apply()
 
-    /** VoicePrint audio gating mode: OFF, OWNER_ONLY, OWNER_FOR_SENSITIVE (default) */
+    /** VoicePrint audio gating mode: OFF, OWNER_ONLY (default: only Boss's voice is heard), OWNER_FOR_SENSITIVE */
     var voiceGateMode: String
-        get() = prefs.getString(KEY_VOICE_GATE_MODE, "OWNER_FOR_SENSITIVE") ?: "OWNER_FOR_SENSITIVE"
+        get() = prefs.getString(KEY_VOICE_GATE_MODE, "OWNER_ONLY") ?: "OWNER_ONLY"
         set(value) = prefs.edit().putString(KEY_VOICE_GATE_MODE, value).apply()
+
+    /** Semantic (meaning-based) document search: indexed text chunks are sent to Gemini to create embeddings. */
+    var isRagSemanticSearchEnabled: Boolean
+        get() = prefs.getBoolean("rag_semantic_search_enabled", true)
+        set(value) = prefs.edit().putBoolean("rag_semantic_search_enabled", value).apply()
 
     /** VoicePrint threshold sensitivity offset (-0.15 to +0.15) */
     var voiceprintSensitivityOffset: Float
@@ -273,7 +278,15 @@ class AppSettings(context: Context) {
         get() = prefs.getString(KEY_FLOATING_ORB_STYLE, ORB_STYLE_CLASSIC) ?: ORB_STYLE_CLASSIC
         set(value) = prefs.edit().putString(KEY_FLOATING_ORB_STYLE, value).apply()
 
+    // ── App theme (Classic MYRA / Blue Glass) ─────────────────────────────────
+
+    /** Persisted theme id ("classic" | "blue_glass"). Default "classic" so existing users are never switched. */
+    var appThemeMode: String
+        get() = prefs.getString(KEY_APP_THEME_MODE, "classic") ?: "classic"
+        set(value) = prefs.edit().putString(KEY_APP_THEME_MODE, value).apply()
+
     companion object {
+        private const val KEY_APP_THEME_MODE = "app_theme_mode"
         const val ORB_STYLE_CLASSIC = "classic"
         const val ORB_STYLE_PARTICLE = "particle"
         private const val KEY_FLOATING_ORB_STYLE = "floating_orb_style"

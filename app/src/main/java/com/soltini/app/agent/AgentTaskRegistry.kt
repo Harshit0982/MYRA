@@ -21,6 +21,9 @@ object AgentTaskRegistry {
         if (current === engine) current = null
     }
 
+    /** True while an engine run or a task list is executing (used to keep new work / screen peeks from interrupting it). */
+    fun isBusy(): Boolean = current?.isActive == true || TaskQueueRegistry.isActive()
+
     /** Snapshot of the running task, else of the last finished one, else null. Used by the floating HUD. */
     fun currentOrLast(): TaskSnapshot? = current?.snapshot() ?: lastSnapshot
 

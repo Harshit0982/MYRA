@@ -58,6 +58,7 @@ class AgentToolExecutor(private val context: Context) {
     }
 
     private val youtubeAutomator = YouTubeAutomator(context)
+    private val visionTapper = VisionTapper(context)
     private val whatsappAutomator = WhatsAppAutomator(context)
     private val appManager = AppManager(context)
     private val fileManager = DeviceFileManager(context)
@@ -154,6 +155,18 @@ class AgentToolExecutor(private val context: Context) {
                         TaskQueueRunner(context, this@AgentToolExecutor, com.soltini.app.settings.AppSettings(context)).resume()
                     }
                     JSONObject().put("status", "resuming_task_list").put("message", "Adhure kaam dobara shuru kar rahi hu.")
+                } else if (r.optString("status") == "no_task" && !TaskQueueRegistry.isActive() && TaskCheckpointStore.load(context) != null) {
+                    val cp = TaskCheckpointStore.load(context)!!
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        val engine = AgentTaskEngine(context, this@AgentToolExecutor, com.soltini.app.settings.AppSettings(context))
+                        engine.restore(cp)
+                        val resumeGoal = cp.goal + "\n[RESUME: this task was interrupted. Steps already done: " +
+                            (if (cp.actionLog.isEmpty()) "none" else cp.actionLog.takeLast(8).joinToString(" -> ")) +
+                            ". Look at the CURRENT screen, continue from where it stopped and do not redo finished steps.]"
+                        val msg = engine.run(resumeGoal) { AgentStatusBus.emit(it) }
+                        AgentStatusBus.emit("[AGENT TASK FINISHED] $msg Tell Boss the outcome briefly in Hinglish.")
+                    }
+                    JSONObject().put("status", "resuming_interrupted_task").put("message", "Adhura kaam: \"${cp.goal.take(60)}\" wahin se dobara shuru kar rahi hu.")
                 } else r
             }
             "task_reply"    -> AgentTaskRegistry.reply(args.optString("answer", args.optString("reply", "")))
@@ -233,10 +246,21 @@ class AgentToolExecutor(private val context: Context) {
             // ── Screen Automation & Semantic Operator ─────────────────────
             "read_screen", "observe_screen" -> observeScreen()
             "inspect_screen" -> screenOperator.inspectScreen()
-            "smart_click", "click_element" -> screenOperator.clickElement(
-                target = args.optString("target", args.optString("text", args.optString("label", ""))),
-                autoScroll = args.optBoolean("auto_scroll", true)
-            )
+            "smart_click", "click_element" -> {
+                val clickTarget = args.optString("target", args.optString("text", args.optString("label", "")))
+                val r = screenOperator.clickElement(
+                    target = clickTarget,
+                    autoScroll = args.optBoolean("auto_scroll", true)
+                )
+                // Accessibility could not find it -> try to SEE it (vision fallback)
+                if (clickTarget.isNotBlank() && (r.has("error") || r.optString("status") == "error")) {
+                    val v = try { blocking(30_000L) { visionTapper.tap(clickTarget) } } catch (_: Exception) { null }
+                    if (v != null && v.optString("status") == "success") v else r
+                } else r
+            }
+            "tap_by_vision", "vision_tap", "tap_on_image" -> blocking(30_000L) {
+                visionTapper.tap(args.optString("description", args.optString("target", args.optString("text", ""))))
+            }
             "smart_type"    -> screenOperator.typeIntoField(
                 targetField = args.optString("field", args.optString("target", "")).takeIf { it.isNotBlank() },
                 textToType = args.optString("text", args.optString("query", "")),
@@ -750,10 +774,16 @@ class AgentToolExecutor(private val context: Context) {
         if (text.isBlank()) return error("text is required")
         val svc = SoltiniAccessibilityService.getInstance()
             ?: return error("Accessibility Service not active")
-        return if (svc.typeText(text)) {
-            result("status", "typed", "text", text)
-        } else {
-            error("No editable text field found on screen. Please tap a text field first.")
+        val o = svc.typeTextDetailed(text)
+        return when {
+            o.ok && o.verified -> result("status", "typed", "text", text, "verified", "true")
+            o.ok -> result(
+                "status", "typed_unverified", "text", text, "verified", "false",
+                "note", "The field accepted the input but the text could not be confirmed. " +
+                    "Call look_at_screen to check; if it is missing, tap the field and type again. " +
+                    "Do NOT tell the user it is done until you have seen the text on screen."
+            )
+            else -> error("Text could NOT be typed (no editable field accepted it). Tap the field first, then retry.")
         }
     }
 

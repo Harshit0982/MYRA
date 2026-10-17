@@ -5,6 +5,8 @@ import android.content.SharedPreferences
 import android.util.Log
 import com.soltini.app.settings.AppSettings
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -273,7 +275,36 @@ class TaskQueueRunner(
             val total = q.items.size
             say("[AGENT] $total kaam hain. Ek-ek karke karungi aur bas short me Boss ko batana.")
 
-            var first = true
+            // Parallel lane: phone-setting tasks that never touch the screen (alarm, timer, volume ...) run at the
+            // same time as the screen tasks. Anything that fails there goes back to the normal queue.
+            val silentLane = SilentLaneRunner(context, executor, appSettings)
+            val silentItems = if (total > 1)
+                q.items.filter { it.status == QueueItemStatus.PENDING && silentLane.isSilent(it.goal) } else emptyList()
+            silentItems.forEach { it.status = QueueItemStatus.RUNNING }
+            if (silentItems.isNotEmpty()) store.save(q)
+            val silentScope = kotlinx.coroutines.CoroutineScope(Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
+            val silentJobs = silentItems.map { item ->
+                silentScope.async {
+                    val (ok, msg) = try { silentLane.run(item.goal) } catch (e: Exception) { false to (e.message ?: "failed") }
+                    if (ok) {
+                        item.status = QueueItemStatus.DONE
+                        item.result = msg.take(240)
+                        say("[AGENT] (saath me) ${item.goal.take(40)} ho gaya.")
+                    } else {
+                        Log.i(TAG, "silent lane could not do '${item.goal}' ($msg) -> normal queue")
+                        item.status = QueueItemStatus.PENDING
+                    }
+                }
+            }
+
+            var aborted = false
+            for (pass in 0..1) {
+                if (cancelled || aborted) break
+                if (pass == 1) {
+                    silentJobs.awaitAll()
+                    if (q.items.none { it.status == QueueItemStatus.PENDING }) break
+                }
+                var first = pass == 0
             for ((idx, item) in q.items.withIndex()) {
                 if (cancelled) break
                 if (item.status != QueueItemStatus.PENDING) continue
@@ -288,11 +319,13 @@ class TaskQueueRunner(
                 val outcome = runItem(item)
                 store.save(q)
                 when (outcome) {
-                    Outcome.ABORT -> { say("[AGENT] Aage nahi badh pa rahi: ${item.result}"); break }
+                    Outcome.ABORT -> { say("[AGENT] Aage nahi badh pa rahi: ${item.result}"); aborted = true; break }
                     Outcome.CANCELLED -> break
                     else -> say("[AGENT] Kaam ${idx + 1}/$total ${if (outcome == Outcome.DONE) "ho gaya" else "nahi ho paya"}.")
                 }
             }
+            }
+            try { silentJobs.awaitAll() } catch (_: Exception) {}
             if (cancelled) q.items.filter { it.status == QueueItemStatus.PENDING }.forEach { it.status = QueueItemStatus.CANCELLED }
             return summary(q)
         } finally {
