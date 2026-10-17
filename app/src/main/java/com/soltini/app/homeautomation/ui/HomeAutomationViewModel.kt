@@ -131,6 +131,27 @@ class HomeAutomationViewModel(application: Application) : AndroidViewModel(appli
     }
 
     /**
+     * Sends ON/OFF to every saved device. Only reports what is known: how many commands were handed to the broker.
+     * Actual device state still comes from the live MQTT state feed shown on each card.
+     */
+    fun setAllDevices(on: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val all = devices.value
+            if (all.isEmpty()) {
+                _userMessage.value = "No devices to control."
+                return@launch
+            }
+            val payload = if (on) "ON" else "OFF"
+            val sent = all.count { mqttManager.publish("${it.mqttTopicBase}/set", payload) }
+            _userMessage.value = when {
+                sent == 0 -> "Could not send commands: MQTT disconnected."
+                sent < all.size -> "Sent $payload to $sent of ${all.size} devices; ${all.size - sent} failed."
+                else -> "Sent $payload to $sent devices. Cards update when each device confirms."
+            }
+        }
+    }
+
+    /**
      * Generates the Arduino C++ sketch (.ino) for a specified board.
      */
     fun generateFirmwareForBoard(boardId: String) {

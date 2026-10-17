@@ -64,7 +64,10 @@ fun AppearanceSettingsSection() {
             ThemeOptionCard(
                 mode = mode,
                 isSelected = current == mode,
-                onSelect = { ThemeController.set(context, mode) }
+                onSelect = {
+                    ThemeController.set(context, mode)
+                    com.soltini.app.overlay.OverlayService.getInstance()?.applyOrbStyle() // recreate live orb with the new palette
+                }
             )
             Spacer(Modifier.height(12.dp))
         }

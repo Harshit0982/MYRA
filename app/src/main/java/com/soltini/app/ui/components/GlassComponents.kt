@@ -541,7 +541,7 @@ fun GlassQuickActionChip(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = label,
-                color = TextCharcoal,
+                color = LocalMyraTokens.current.textPrimary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1
@@ -595,7 +595,7 @@ fun GlassPillSearchBar(
                 if (value.isEmpty()) {
                     Text(
                         text = placeholder,
-                        color = TextMidGray,
+                        color = LocalMyraTokens.current.textSecondary,
                         fontSize = 14.sp
                     )
                 }
@@ -605,7 +605,7 @@ fun GlassPillSearchBar(
                     singleLine = singleLine,
                     textStyle = TextStyle(
                         fontFamily = InterFontFamily,
-                        color = TextCharcoal,
+                        color = LocalMyraTokens.current.textPrimary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
                     ),
@@ -670,7 +670,7 @@ fun GlassPillInput(
                 if (value.isEmpty()) {
                     Text(
                         text = placeholder,
-                        color = TextMidGray,
+                        color = LocalMyraTokens.current.textSecondary,
                         fontSize = 13.sp
                     )
                 }
@@ -681,7 +681,7 @@ fun GlassPillInput(
                     visualTransformation = visualTransformation,
                     textStyle = TextStyle(
                         fontFamily = InterFontFamily,
-                        color = TextCharcoal,
+                        color = LocalMyraTokens.current.textPrimary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
                     ),
@@ -764,7 +764,7 @@ fun GlassSectionHeader(
     Column(modifier = modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
         Text(
             text = title,
-            color = TextCharcoal,
+            color = LocalMyraTokens.current.textPrimary,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold
         )
@@ -772,7 +772,7 @@ fun GlassSectionHeader(
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
-                color = TextMidGray,
+                color = LocalMyraTokens.current.textSecondary,
                 fontSize = 12.sp
             )
         }
@@ -817,7 +817,7 @@ fun GlassListItemCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    color = TextCharcoal,
+                    color = LocalMyraTokens.current.textPrimary,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -825,7 +825,7 @@ fun GlassListItemCard(
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = subtitle,
-                        color = TextMidGray,
+                        color = LocalMyraTokens.current.textSecondary,
                         fontSize = 12.sp,
                         lineHeight = 16.sp
                     )
@@ -873,7 +873,7 @@ fun GlassCodeContainer(
                 if (title != null) {
                     Text(
                         text = title,
-                        color = TextCharcoal,
+                        color = LocalMyraTokens.current.textPrimary,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 13.sp
                     )

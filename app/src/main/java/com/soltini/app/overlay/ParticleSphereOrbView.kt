@@ -163,7 +163,7 @@ class ParticleSphereOrbView(context: Context) : View(context), OrbIndicator {
         val depthAlpha = floatArrayOf(0.30f, 0.62f, 1.00f)
         val depthWidth = floatArrayOf(2.6f, 3.6f, 5.0f)
         for (h in 0 until HUE_BUCKETS) {
-            hsv[0] = (h + 0.5f) / HUE_BUCKETS * 360f
+            hsv[0] = com.soltini.app.ui.theme.OrbPalette.hue((h + 0.5f) / HUE_BUCKETS * 360f)
             hsv[1] = saturation
             hsv[2] = 1f
             val base = Color.HSVToColor(hsv)

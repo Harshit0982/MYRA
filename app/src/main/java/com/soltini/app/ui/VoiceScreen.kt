@@ -113,8 +113,6 @@ fun VoiceScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    // Capture theme mode during composition; LazyListScope item conditions are not composable.
-    val currentThemeMode = LocalMyraTokens.current.mode
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
@@ -207,7 +205,7 @@ fun VoiceScreen(
             }
 
             // Blue Glass home dashboard: shortcut cards to existing destinations (Classic keeps its own nav)
-            if (currentThemeMode == MyraThemeMode.BLUE_GLASS) {
+            if (LocalMyraTokens.current.mode == MyraThemeMode.BLUE_GLASS) {
                 item {
                     HomeShortcutCards(
                         onOpenBrowser = onOpenBrowser,
@@ -352,7 +350,7 @@ private fun ChatCommandInputBar(
                     Text(
                         text = "Ask Myra or type a command...",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = TextMidGray
+                        color = LocalMyraTokens.current.textSecondary
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -365,7 +363,7 @@ private fun ChatCommandInputBar(
                     cursorColor = BadgePurpleTint
                 ),
                 maxLines = 2,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextCharcoal)
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = LocalMyraTokens.current.textPrimary)
             )
 
             Spacer(modifier = Modifier.width(6.dp))
@@ -484,13 +482,13 @@ private fun TopBar(
             Column {
                 Text(
                     text = appName,
-                    color = TextCharcoal,
+                    color = LocalMyraTokens.current.textPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 19.sp
                 )
                 Text(
                     text = "AI Companion",
-                    color = TextMidGray,
+                    color = LocalMyraTokens.current.textSecondary,
                     fontSize = 12.sp
                 )
             }
@@ -653,7 +651,7 @@ private fun HeroOrbGlassCard(
                 )
                 Text(
                     text = "Floating Orb Ready",
-                    color = TextMidGray,
+                    color = LocalMyraTokens.current.textSecondary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -681,14 +679,14 @@ private fun HeroOrbGlassCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = statusTitle,
-                        color = TextCharcoal,
+                        color = LocalMyraTokens.current.textPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = statusSubtitle,
-                        color = TextMidGray,
+                        color = LocalMyraTokens.current.textSecondary,
                         fontSize = 12.sp
                     )
                 }
@@ -762,7 +760,7 @@ private fun CommandChipsRow(
     Column {
         Text(
             text = "Quick Voice Shortcuts",
-            color = TextCharcoal,
+            color = LocalMyraTokens.current.textPrimary,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 10.dp)
@@ -793,7 +791,7 @@ private fun AgentStatusRow(
     Column {
         Text(
             text = "Agent Capabilities",
-            color = TextCharcoal,
+            color = LocalMyraTokens.current.textPrimary,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 10.dp)
@@ -877,14 +875,14 @@ private fun BackgroundPersistenceAlert(context: Context) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Background Running Restricted",
-                    color = TextCharcoal,
+                    color = LocalMyraTokens.current.textPrimary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Battery saver can pause Myra when the screen is off. Tap to set Unrestricted.",
-                    color = TextMidGray,
+                    color = LocalMyraTokens.current.textSecondary,
                     fontSize = 12.sp,
                     lineHeight = 16.sp
                 )
@@ -952,7 +950,7 @@ private fun AgentCapCard(
             Column {
                 Text(
                     text = title,
-                    color = TextCharcoal,
+                    color = LocalMyraTokens.current.textPrimary,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.sp
                 )
@@ -977,7 +975,7 @@ private fun TranscriptHeader(onClear: () -> Unit) {
     ) {
         Text(
             text = "Conversation",
-            color = TextCharcoal,
+            color = LocalMyraTokens.current.textPrimary,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold
         )
@@ -1149,7 +1147,7 @@ fun DualPauseModeCard(
                             isLitePaused -> "Lite Paused — Accessibility silenced"
                             else -> "Banking & Privacy Shield"
                         },
-                        color = TextCharcoal,
+                        color = LocalMyraTokens.current.textPrimary,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 15.sp
                     )
@@ -1199,13 +1197,13 @@ fun DualPauseModeCard(
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = if (liteActive) "Resume" else "Lite Pause",
-                            color = TextCharcoal,
+                            color = LocalMyraTokens.current.textPrimary,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.sp
                         )
                         Text(
                             text = "GPay · PhonePe · Paytm",
-                            color = TextMidGray,
+                            color = LocalMyraTokens.current.textSecondary,
                             fontSize = 10.sp,
                             textAlign = TextAlign.Center
                         )
@@ -1235,13 +1233,13 @@ fun DualPauseModeCard(
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = if (hardActive) "Resume" else "Force Stop",
-                            color = TextCharcoal,
+                            color = LocalMyraTokens.current.textPrimary,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 13.sp
                         )
                         Text(
                             text = "HDFC · ICICI · SBI",
-                            color = TextMidGray,
+                            color = LocalMyraTokens.current.textSecondary,
                             fontSize = 10.sp,
                             textAlign = TextAlign.Center
                         )

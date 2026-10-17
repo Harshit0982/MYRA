@@ -26,6 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PowerOff
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
@@ -242,6 +244,8 @@ fun HomeAutomationScreen(
                         onToggle = { viewModel.toggleDevice(it) },
                         onDelete = { viewModel.deleteDevice(it) },
                         onGenerateCode = { boardId -> viewModel.generateFirmwareForBoard(boardId) },
+                        onAllOn = { viewModel.setAllDevices(true) },
+                        onAllOff = { viewModel.setAllDevices(false) },
                         onAddNew = {
                             if (onNavigateToAddDevice != null) {
                                 onNavigateToAddDevice()
@@ -390,6 +394,8 @@ private fun DeviceListTab(
     onToggle: (DeviceEntity) -> Unit,
     onDelete: (DeviceEntity) -> Unit,
     onGenerateCode: (String) -> Unit,
+    onAllOn: () -> Unit,
+    onAllOff: () -> Unit,
     onAddNew: () -> Unit
 ) {
     if (devices.isEmpty()) {
@@ -471,6 +477,37 @@ private fun DeviceListTab(
                     onToggle = { onToggle(device) },
                     onDelete = { onDelete(device) }
                 )
+            }
+        }
+
+        item(key = "quick_controls") {
+            val t = LocalMyraTokens.current
+            GlassCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+                Text("Quick Controls", color = t.textPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    listOf(
+                        Triple("All On", Icons.Default.PowerSettingsNew, onAllOn),
+                        Triple("All Off", Icons.Default.PowerOff, onAllOff),
+                        Triple("Add Device", Icons.Default.Add, onAddNew)
+                    ).forEach { (label, icon, action) ->
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(16.dp))
+                                .clickable(onClick = action)
+                                .padding(vertical = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier.size(42.dp).clip(CircleShape).background(t.accentGradient),
+                                contentAlignment = Alignment.Center
+                            ) { Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(22.dp)) }
+                            Spacer(Modifier.height(6.dp))
+                            Text(label, color = t.textPrimary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        }
+                    }
+                }
             }
         }
     }

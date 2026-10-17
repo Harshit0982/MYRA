@@ -128,7 +128,7 @@ class MainActivity : ComponentActivity() {
                         title = {
                             Text(
                                 "App crashed last time",
-                                color = TextCharcoal,
+                                color = LocalMyraTokens.current.textPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                         },
@@ -169,7 +169,7 @@ class MainActivity : ComponentActivity() {
                         },
                         dismissButton = {
                             TextButton(onClick = { crashReport = null }) {
-                                Text("Close", color = TextMidGray)
+                                Text("Close", color = LocalMyraTokens.current.textSecondary)
                             }
                         }
                     )

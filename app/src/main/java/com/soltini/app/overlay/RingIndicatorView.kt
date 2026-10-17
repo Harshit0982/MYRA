@@ -179,7 +179,7 @@ class RingIndicatorView(context: Context) : View(context), OrbIndicator {
                     val b = projected[d * max + a]!!
                     val c = projected[((a + 1) % max) + d * max]!!
 
-                    val hue = (a.toFloat() / max * 360f)
+                    val hue = com.soltini.app.ui.theme.OrbPalette.hue(a.toFloat() / max * 360f)
                     linePaint.color = Color.HSVToColor(
                         lineAlpha,
                         floatArrayOf(hue, saturation, 1f)

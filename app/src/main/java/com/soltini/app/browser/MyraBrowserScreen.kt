@@ -120,8 +120,6 @@ fun MyraBrowserScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    // Read CompositionLocal values during composition; callbacks capture this stable snapshot.
-    val myraTokens = LocalMyraTokens.current
     val browserController = remember { BrowserController.getInstance(context) }
     val themeManager = remember { BrowserThemeManager.getInstance(context) }
     val scope = rememberCoroutineScope()
@@ -316,7 +314,7 @@ fun MyraBrowserScreen(
                                     Text(
                                         "Search or enter address...",
                                         fontSize = 12.sp,
-                                        color = TextMidGray,
+                                        color = LocalMyraTokens.current.textSecondary,
                                         maxLines = 1
                                     )
                                 },
@@ -446,7 +444,7 @@ fun MyraBrowserScreen(
 
                         Text(
                             text = if (statusMessage.isNotBlank()) statusMessage else "Myra Browser Ready",
-                            color = TextMidGray,
+                            color = LocalMyraTokens.current.textSecondary,
                             fontSize = 11.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -511,7 +509,7 @@ fun MyraBrowserScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = playbackInfo.title.ifBlank { "Media Playback" },
-                                color = TextCharcoal,
+                                color = LocalMyraTokens.current.textPrimary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 1,
@@ -607,7 +605,7 @@ fun MyraBrowserScreen(
                             // Live Clock & Aesthetic Greeting
                             Text(
                                 text = currentTimeStr,
-                                color = TextCharcoal,
+                                color = LocalMyraTokens.current.textPrimary,
                                 fontSize = 36.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -639,7 +637,7 @@ fun MyraBrowserScreen(
                                         Text(
                                             "Search Google or enter website URL...",
                                             fontSize = 14.sp,
-                                            color = TextMidGray
+                                            color = LocalMyraTokens.current.textSecondary
                                         )
                                     },
                                     leadingIcon = {
@@ -684,7 +682,7 @@ fun MyraBrowserScreen(
                             ) {
                                 Text(
                                     text = "Quick Launch Shortcuts",
-                                    color = TextCharcoal,
+                                    color = LocalMyraTokens.current.textPrimary,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -763,7 +761,7 @@ fun MyraBrowserScreen(
                                                 Spacer(modifier = Modifier.height(6.dp))
                                                 Text(
                                                     text = sc.name,
-                                                    color = TextCharcoal,
+                                                    color = LocalMyraTokens.current.textPrimary,
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Medium,
                                                     maxLines = 1,
@@ -793,7 +791,7 @@ fun MyraBrowserScreen(
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "One-Tap Voice Prompts",
-                                    color = TextCharcoal,
+                                    color = LocalMyraTokens.current.textPrimary,
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -853,13 +851,13 @@ fun MyraBrowserScreen(
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             "Browser Style & Wallpapers",
-                                            color = TextCharcoal,
+                                            color = LocalMyraTokens.current.textPrimary,
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.SemiBold
                                         )
                                         Text(
                                             "${currentTheme.emoji} ${currentTheme.name} • ${currentWallpaper.name}",
-                                            color = TextMidGray,
+                                            color = LocalMyraTokens.current.textSecondary,
                                             fontSize = 12.sp
                                         )
                                     }
@@ -957,7 +955,7 @@ fun MyraBrowserScreen(
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         "Themes & Wallpapers",
-                        color = TextCharcoal,
+                        color = LocalMyraTokens.current.textPrimary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -994,7 +992,7 @@ fun MyraBrowserScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         theme.name,
-                                        color = TextCharcoal,
+                                        color = LocalMyraTokens.current.textPrimary,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.SemiBold
                                     )
@@ -1052,11 +1050,11 @@ fun MyraBrowserScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         wp.name,
-                                        color = TextCharcoal,
+                                        color = LocalMyraTokens.current.textPrimary,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.SemiBold
                                     )
-                                    Text(wp.category, color = TextMidGray, fontSize = 11.sp)
+                                    Text(wp.category, color = LocalMyraTokens.current.textSecondary, fontSize = 11.sp)
                                 }
                             }
                         }
@@ -1106,7 +1104,7 @@ fun MyraBrowserScreen(
             title = {
                 Text(
                     "Add Website Shortcut",
-                    color = TextCharcoal,
+                    color = LocalMyraTokens.current.textPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -1146,7 +1144,7 @@ fun MyraBrowserScreen(
                                     name = newName,
                                     url = fullUrl,
                                     iconLabel = initial,
-                                    gradient = listOf(myraTokens.accent, myraTokens.accentSecondary)
+                                    gradient = listOf(LocalMyraTokens.current.accent, LocalMyraTokens.current.accentSecondary)
                                 )
                             )
                             showAddShortcutDialog = false
@@ -1157,7 +1155,7 @@ fun MyraBrowserScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showAddShortcutDialog = false }) {
-                    Text("Cancel", color = TextMidGray)
+                    Text("Cancel", color = LocalMyraTokens.current.textSecondary)
                 }
             }
         )
@@ -1184,7 +1182,7 @@ fun MyraBrowserScreen(
                         "Password & ID Vault",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextCharcoal
+                        color = LocalMyraTokens.current.textPrimary
                     )
                 }
             },
@@ -1192,7 +1190,7 @@ fun MyraBrowserScreen(
                 if (creds.isEmpty()) {
                     Text(
                         "No saved login credentials yet. Tell Myra: 'Is site ke credentials save kar lo' to store logins securely.",
-                        color = TextMidGray,
+                        color = LocalMyraTokens.current.textSecondary,
                         fontSize = 13.sp
                     )
                 } else {
@@ -1218,12 +1216,12 @@ fun MyraBrowserScreen(
                                         )
                                         Text(
                                             "User: " + obj.optString("username"),
-                                            color = TextCharcoal,
+                                            color = LocalMyraTokens.current.textPrimary,
                                             fontSize = 12.sp
                                         )
                                         Text(
                                             "Pass: ••••••••",
-                                            color = TextMidGray,
+                                            color = LocalMyraTokens.current.textSecondary,
                                             fontSize = 11.sp
                                         )
                                     }
